@@ -21,16 +21,22 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 	{
 		readonly ContainerWidget template;
 
+		DropDownButtonWidget difficulty;
+		Widget temp_wid;
+
 		[ObjectCreator.UseCtor]
 		public GameInfoObjectivesLogic(Widget widget, World world)
 		{
 			var lp = world.LocalPlayer;
 
 			var missionStatus = widget.Get<LabelWidget>("MISSION_STATUS");
-			missionStatus.GetText = () => lp.WinState == WinState.Undefined ? "In progress" :
+			missionStatus.GetText = () => lp.WinState == WinState.Undefined ? "In progress":
 				lp.WinState == WinState.Won ? "Accomplished" : "Failed";
 			missionStatus.GetColor = () => lp.WinState == WinState.Undefined ? Color.White :
 				lp.WinState == WinState.Won ? Color.LimeGreen : Color.Red;
+
+
+			difficulty = temp_wid.Get<DropDownButtonWidget>("DIFFICULTY_DROPDOWNBUTTON");
 
 			var mo = lp.PlayerActor.TraitOrDefault<MissionObjectives>();
 			if (mo == null)

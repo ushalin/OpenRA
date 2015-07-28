@@ -14,6 +14,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading;
+using System.Drawing;
 using OpenRA.FileSystem;
 using OpenRA.Graphics;
 using OpenRA.Network;
@@ -29,7 +30,6 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 		readonly ScrollPanelWidget descriptionPanel;
 		readonly LabelWidget description;
 		readonly SpriteFont descriptionFont;
-		readonly DropDownButtonWidget difficultyButton;
 		readonly ButtonWidget startBriefingVideoButton;
 		readonly ButtonWidget stopBriefingVideoButton;
 		readonly ButtonWidget startInfoVideoButton;
@@ -40,6 +40,8 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 		readonly ScrollPanelWidget missionList;
 		readonly ScrollItemWidget headerTemplate;
 		readonly ScrollItemWidget template;
+
+		DropDownButtonWidget difficultyButton;
 
 		MapPreview selectedMapPreview;
 
@@ -104,7 +106,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 						.Where(p => p.Status == MapStatus.Available && missionMapPaths.Contains(Path.GetFullPath(p.Map.Path)))
 						.Select(p => p.Map);
 
-					CreateMissionGroup(kv.Key, maps);
+					CreateMissionGroup(widget, kv.Key, maps);
 					allMaps.AddRange(maps);
 				}
 			}
@@ -116,12 +118,14 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 			if (looseMissions.Any())
 			{
-				CreateMissionGroup("Missions", looseMissions);
+				CreateMissionGroup(widget, "Missions", looseMissions);
 				allMaps.AddRange(looseMissions);
 			}
 
-			if (allMaps.Any())
-				SelectMap(allMaps.First());
+            if (allMaps.Any())
+            {
+                SelectMap(widget, allMaps.First());
+            }
 
 			var startButton = widget.Get<ButtonWidget>("STARTGAME_BUTTON");
 			startButton.OnClick = StartMissionClicked;
@@ -136,7 +140,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			};
 		}
 
-		void CreateMissionGroup(string title, IEnumerable<Map> maps)
+		void CreateMissionGroup(Widget widget, string title, IEnumerable<Map> maps)
 		{
 			var header = ScrollItemWidget.Setup(headerTemplate, () => true, () => { });
 			header.Get<LabelWidget>("LABEL").GetText = () => title;
@@ -148,7 +152,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 				var item = ScrollItemWidget.Setup(template,
 					() => selectedMapPreview != null && selectedMapPreview.Uid == map.Uid,
-					() => SelectMap(map),
+					() => SelectMap(widget, map),
 					StartMissionClicked);
 
 				item.Get<LabelWidget>("TITLE").GetText = () => map.Title;
@@ -156,7 +160,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			}
 		}
 
-		void SelectMap(Map map)
+		void SelectMap(Widget widget, Map map)
 		{
 			selectedMapPreview = Game.ModData.MapCache[map.Uid];
 
@@ -189,9 +193,15 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			difficultyButton.IsVisible = () => map.Options.Difficulties.Any();
 			if (!map.Options.Difficulties.Any())
 				return;
-
+            
 			difficulty = map.Options.Difficulties.First();
-			difficultyButton.OnMouseDown = _ =>
+
+            string temp = difficulty;
+            // KEEP THIS HERE 4 SHO
+            widget.Get<DropDownButtonWidget>("DIFFICULTY_DROPDOWNBUTTON").Text = "Difficulty - " + difficulty;
+            difficultyButton = widget.Get<DropDownButtonWidget>("DIFFICULTY_DROPDOWNBUTTON");
+            //
+			difficultyButton.OnClick = () =>
 			{
 				var options = map.Options.Difficulties.Select(d => new DropDownOption
 				{
@@ -199,13 +209,17 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 					IsSelected = () => difficulty == d,
 					OnClick = () => difficulty = d
 				});
-				Func<DropDownOption, ScrollItemWidget, ScrollItemWidget> setupItem = (option, template) =>
-				{
-					var item = ScrollItemWidget.Setup(template, option.IsSelected, option.OnClick);
-					item.Get<LabelWidget>("LABEL").GetText = () => option.Title;
-					return item;
-				};
-				difficultyButton.ShowDropDown("LABEL_DROPDOWN_TEMPLATE", options.Count() * 30, options, setupItem);
+
+                Func<DropDownOption, ScrollItemWidget, ScrollItemWidget> setupItem = (option, template) =>
+                {
+                    var item = ScrollItemWidget.Setup(template, option.IsSelected, option.OnClick);
+                    item.Get<LabelWidget>("LABEL").GetText = () => option.Title;
+                    return item;
+                };
+                
+                widget.Get<DropDownButtonWidget>("DIFFICULTY_DROPDOWNBUTTON").Text = "Difficulty - " + difficulty;
+                difficultyButton = widget.Get<DropDownButtonWidget>("DIFFICULTY_DROPDOWNBUTTON");
+                difficultyButton.ShowDropDown("LABEL_DROPDOWN_TEMPLATE", options.Count() * 30, options, setupItem);
 			};
 		}
 
