@@ -16,6 +16,19 @@ Container@MISSION_OBJECTIVES:
 			Width: PARENT_RIGHT - 120
 			Height: 25
 			Font: MediumBold
+		Label@DIFFICULTY:
+			X: 300
+			Y: 20
+			Width: PARENT_RIGHT - 120
+			Height: 25
+			Font: MediumBold
+			Text: Difficulty: 
+		Label@MISSION_DIFFICULTY:
+			X: 390
+			Y: 20
+			Width: 80
+			Height: 25
+			Font: MediumBold
 		ScrollPanel@OBJECTIVES_PANEL:
 			X: 20
 			Y: 60

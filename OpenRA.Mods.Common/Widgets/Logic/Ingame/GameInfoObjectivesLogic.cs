@@ -14,6 +14,7 @@ using System.Linq;
 using OpenRA.Mods.Common.Traits;
 using OpenRA.Traits;
 using OpenRA.Widgets;
+using OpenRA.FileSystem;
 
 namespace OpenRA.Mods.Common.Widgets.Logic
 {
@@ -21,8 +22,11 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 	{
 		readonly ContainerWidget template;
 
-		DropDownButtonWidget difficulty;
-		Widget temp_wid;
+        // DELETE THIS LATER POSSIBLY
+		// DropDownButtonWidget difficulty;
+        //Widget temp_wid;
+
+        String difficulty;
 
 		[ObjectCreator.UseCtor]
 		public GameInfoObjectivesLogic(Widget widget, World world)
@@ -35,8 +39,19 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			missionStatus.GetColor = () => lp.WinState == WinState.Undefined ? Color.White :
 				lp.WinState == WinState.Won ? Color.LimeGreen : Color.Red;
 
+            /*var temp = world.Map.Options.Difficulties.Select(d => new LabelWidget
+            {
+                GetText = () => difficulty = d
+            });*/
 
-			difficulty = temp_wid.Get<DropDownButtonWidget>("DIFFICULTY_DROPDOWNBUTTON");
+            //difficulty = world.Map.Options.Difficulties.FirstOrDefault();
+
+            difficulty = widget.Get<DropDownButtonWidget>("DIFFICULTY_DROPDOWNBUTTON").Text;
+
+            //var missionDifficulty = widget.Get<LabelWidget>("MISSION_DIFFICULTY");
+            widget.Get<LabelWidget>("MISSION_DIFFICULTY").Text = difficulty;
+
+            //String s_diff = Map.Difficulty();
 
 			var mo = lp.PlayerActor.TraitOrDefault<MissionObjectives>();
 			if (mo == null)
@@ -75,5 +90,11 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 				parent.AddChild(widget);
 			}
 		}
+        class DropDownOption
+        {
+            public string Title;
+            public Func<bool> IsSelected;
+            public Action OnClick;
+        }
 	}
 }

@@ -1,0 +1,155 @@
+diff --git a/OpenRA.Mods.Common/Widgets/Logic/Ingame/GameInfoObjectivesLogic.cs b/OpenRA.Mods.Common/Widgets/Logic/Ingame/GameInfoObjectivesLogic.cs
+index 2eb3f30..3f68270 100644
+--- a/OpenRA.Mods.Common/Widgets/Logic/Ingame/GameInfoObjectivesLogic.cs
++++ b/OpenRA.Mods.Common/Widgets/Logic/Ingame/GameInfoObjectivesLogic.cs
+@@ -21,23 +21,17 @@ class GameInfoObjectivesLogic
+ 	{
+ 		readonly ContainerWidget template;
+ 
+-		DropDownButtonWidget difficulty;
+-		Widget temp_wid;
+-
+ 		[ObjectCreator.UseCtor]
+ 		public GameInfoObjectivesLogic(Widget widget, World world)
+ 		{
+ 			var lp = world.LocalPlayer;
+ 
+ 			var missionStatus = widget.Get<LabelWidget>("MISSION_STATUS");
+-			missionStatus.GetText = () => lp.WinState == WinState.Undefined ? "In progress":
++			missionStatus.GetText = () => lp.WinState == WinState.Undefined ? "In progress" :
+ 				lp.WinState == WinState.Won ? "Accomplished" : "Failed";
+ 			missionStatus.GetColor = () => lp.WinState == WinState.Undefined ? Color.White :
+ 				lp.WinState == WinState.Won ? Color.LimeGreen : Color.Red;
+ 
+-
+-			difficulty = temp_wid.Get<DropDownButtonWidget>("DIFFICULTY_DROPDOWNBUTTON");
+-
+ 			var mo = lp.PlayerActor.TraitOrDefault<MissionObjectives>();
+ 			if (mo == null)
+ 				return;
+diff --git a/OpenRA.Mods.Common/Widgets/Logic/MissionBrowserLogic.cs b/OpenRA.Mods.Common/Widgets/Logic/MissionBrowserLogic.cs
+index cb719b1..45e4770 100644
+--- a/OpenRA.Mods.Common/Widgets/Logic/MissionBrowserLogic.cs
++++ b/OpenRA.Mods.Common/Widgets/Logic/MissionBrowserLogic.cs
+@@ -14,7 +14,6 @@
+ using System.Linq;
+ using System.Net;
+ using System.Threading;
+-using System.Drawing;
+ using OpenRA.FileSystem;
+ using OpenRA.Graphics;
+ using OpenRA.Network;
+@@ -30,6 +29,7 @@ enum PlayingVideo { None, Info, Briefing, GameStart }
+ 		readonly ScrollPanelWidget descriptionPanel;
+ 		readonly LabelWidget description;
+ 		readonly SpriteFont descriptionFont;
++		readonly DropDownButtonWidget difficultyButton;
+ 		readonly ButtonWidget startBriefingVideoButton;
+ 		readonly ButtonWidget stopBriefingVideoButton;
+ 		readonly ButtonWidget startInfoVideoButton;
+@@ -41,8 +41,6 @@ enum PlayingVideo { None, Info, Briefing, GameStart }
+ 		readonly ScrollItemWidget headerTemplate;
+ 		readonly ScrollItemWidget template;
+ 
+-		DropDownButtonWidget difficultyButton;
+-
+ 		MapPreview selectedMapPreview;
+ 
+ 		PlayingVideo playingVideo;
+@@ -106,7 +104,7 @@ public MissionBrowserLogic(Widget widget, World world, Action onStart, Action on
+ 						.Where(p => p.Status == MapStatus.Available && missionMapPaths.Contains(Path.GetFullPath(p.Map.Path)))
+ 						.Select(p => p.Map);
+ 
+-					CreateMissionGroup(widget, kv.Key, maps);
++					CreateMissionGroup(kv.Key, maps);
+ 					allMaps.AddRange(maps);
+ 				}
+ 			}
+@@ -118,14 +116,12 @@ public MissionBrowserLogic(Widget widget, World world, Action onStart, Action on
+ 
+ 			if (looseMissions.Any())
+ 			{
+-				CreateMissionGroup(widget, "Missions", looseMissions);
++				CreateMissionGroup("Missions", looseMissions);
+ 				allMaps.AddRange(looseMissions);
+ 			}
+ 
+-            if (allMaps.Any())
+-            {
+-                SelectMap(widget, allMaps.First());
+-            }
++			if (allMaps.Any())
++				SelectMap(allMaps.First());
+ 
+ 			var startButton = widget.Get<ButtonWidget>("STARTGAME_BUTTON");
+ 			startButton.OnClick = StartMissionClicked;
+@@ -140,7 +136,7 @@ public MissionBrowserLogic(Widget widget, World world, Action onStart, Action on
+ 			};
+ 		}
+ 
+-		void CreateMissionGroup(Widget widget, string title, IEnumerable<Map> maps)
++		void CreateMissionGroup(string title, IEnumerable<Map> maps)
+ 		{
+ 			var header = ScrollItemWidget.Setup(headerTemplate, () => true, () => { });
+ 			header.Get<LabelWidget>("LABEL").GetText = () => title;
+@@ -152,7 +148,7 @@ void CreateMissionGroup(Widget widget, string title, IEnumerable<Map> maps)
+ 
+ 				var item = ScrollItemWidget.Setup(template,
+ 					() => selectedMapPreview != null && selectedMapPreview.Uid == map.Uid,
+-					() => SelectMap(widget, map),
++					() => SelectMap(map),
+ 					StartMissionClicked);
+ 
+ 				item.Get<LabelWidget>("TITLE").GetText = () => map.Title;
+@@ -160,7 +156,7 @@ void CreateMissionGroup(Widget widget, string title, IEnumerable<Map> maps)
+ 			}
+ 		}
+ 
+-		void SelectMap(Widget widget, Map map)
++		void SelectMap(Map map)
+ 		{
+ 			selectedMapPreview = Game.ModData.MapCache[map.Uid];
+ 
+@@ -193,15 +189,9 @@ void SelectMap(Widget widget, Map map)
+ 			difficultyButton.IsVisible = () => map.Options.Difficulties.Any();
+ 			if (!map.Options.Difficulties.Any())
+ 				return;
+-            
+-			difficulty = map.Options.Difficulties.First();
+ 
+-            string temp = difficulty;
+-            // KEEP THIS HERE 4 SHO
+-            widget.Get<DropDownButtonWidget>("DIFFICULTY_DROPDOWNBUTTON").Text = "Difficulty - " + difficulty;
+-            difficultyButton = widget.Get<DropDownButtonWidget>("DIFFICULTY_DROPDOWNBUTTON");
+-            //
+-			difficultyButton.OnClick = () =>
++			difficulty = map.Options.Difficulties.First();
++			difficultyButton.OnMouseDown = _ =>
+ 			{
+ 				var options = map.Options.Difficulties.Select(d => new DropDownOption
+ 				{
+@@ -209,17 +199,13 @@ void SelectMap(Widget widget, Map map)
+ 					IsSelected = () => difficulty == d,
+ 					OnClick = () => difficulty = d
+ 				});
+-
+-                Func<DropDownOption, ScrollItemWidget, ScrollItemWidget> setupItem = (option, template) =>
+-                {
+-                    var item = ScrollItemWidget.Setup(template, option.IsSelected, option.OnClick);
+-                    item.Get<LabelWidget>("LABEL").GetText = () => option.Title;
+-                    return item;
+-                };
+-                
+-                widget.Get<DropDownButtonWidget>("DIFFICULTY_DROPDOWNBUTTON").Text = "Difficulty - " + difficulty;
+-                difficultyButton = widget.Get<DropDownButtonWidget>("DIFFICULTY_DROPDOWNBUTTON");
+-                difficultyButton.ShowDropDown("LABEL_DROPDOWN_TEMPLATE", options.Count() * 30, options, setupItem);
++				Func<DropDownOption, ScrollItemWidget, ScrollItemWidget> setupItem = (option, template) =>
++				{
++					var item = ScrollItemWidget.Setup(template, option.IsSelected, option.OnClick);
++					item.Get<LabelWidget>("LABEL").GetText = () => option.Title;
++					return item;
++				};
++				difficultyButton.ShowDropDown("LABEL_DROPDOWN_TEMPLATE", options.Count() * 30, options, setupItem);
+ 			};
+ 		}
+ 

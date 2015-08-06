@@ -136,6 +136,8 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			};
 
 			var resumeButton = menu.Get<ButtonWidget>("RESUME");
+			// POSSIBLY ADD THIS HERE  + widget.Get<DropDownButtonWidget>("DIFFICULTY_DROPDOWNBUTTON").Text
+			//resumeButton.Get<ButtonWidget>.Text("RESUME");
 			resumeButton.IsDisabled = () => resumeDisabled;
 			resumeButton.OnClick = closeMenu;
 
