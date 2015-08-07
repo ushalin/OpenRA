@@ -49,6 +49,8 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 		string difficulty;
 
+        int once = 0;
+
 		[ObjectCreator.UseCtor]
 		public MissionBrowserLogic(Widget widget, World world, Action onStart, Action onExit)
 		{
@@ -133,6 +135,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 			widget.Get<ButtonWidget>("BACK_BUTTON").OnClick = () =>
 			{
+                once = 0;
 				StopVideo(videoPlayer);
 				Game.Disconnect();
 				Ui.CloseWindow();
@@ -194,13 +197,22 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			if (!map.Options.Difficulties.Any())
 				return;
             
-			difficulty = map.Options.Difficulties.First();
-
-            string temp = difficulty;
+            //if (once == 0)
+           // {
+                difficulty = map.Options.Difficulties.First();
+                once = 1;
+           // }
             // KEEP THIS HERE 4 SHO
             widget.Get<DropDownButtonWidget>("DIFFICULTY_DROPDOWNBUTTON").Text = "Difficulty - " + difficulty;
+
+
+            File.Delete("difficulty.txt");
+            System.IO.StreamWriter file = new System.IO.StreamWriter("difficulty.txt");
+            Console.WriteLine(difficulty);
+            file.WriteLine(difficulty);
+
             difficultyButton = widget.Get<DropDownButtonWidget>("DIFFICULTY_DROPDOWNBUTTON");
-            //
+            
 			difficultyButton.OnClick = () =>
 			{
 				var options = map.Options.Difficulties.Select(d => new DropDownOption
@@ -220,6 +232,17 @@ namespace OpenRA.Mods.Common.Widgets.Logic
                 widget.Get<DropDownButtonWidget>("DIFFICULTY_DROPDOWNBUTTON").Text = "Difficulty - " + difficulty;
                 difficultyButton = widget.Get<DropDownButtonWidget>("DIFFICULTY_DROPDOWNBUTTON");
                 difficultyButton.ShowDropDown("LABEL_DROPDOWN_TEMPLATE", options.Count() * 30, options, setupItem);
+
+                try 
+                {
+                    Console.WriteLine("{0}1", difficulty);
+                    file.WriteLine(difficulty);
+                    file.Close();
+                }
+                catch (Exception e)
+                {
+
+                }
 			};
 		}
 

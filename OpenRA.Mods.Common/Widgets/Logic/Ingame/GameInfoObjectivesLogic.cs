@@ -46,7 +46,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
             //difficulty = world.Map.Options.Difficulties.FirstOrDefault();
 
-            difficulty = widget.Get<DropDownButtonWidget>("DIFFICULTY_DROPDOWNBUTTON").Text;
+            //difficulty = widget.Get<DropDownButtonWidget>("DIFFICULTY_DROPDOWNBUTTON").Text;
 
             //var missionDifficulty = widget.Get<LabelWidget>("MISSION_DIFFICULTY");
             widget.Get<LabelWidget>("MISSION_DIFFICULTY").Text = difficulty;
