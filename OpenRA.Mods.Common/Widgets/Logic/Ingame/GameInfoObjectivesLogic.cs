@@ -49,6 +49,12 @@ namespace OpenRA.Mods.Common.Widgets.Logic
             //difficulty = widget.Get<DropDownButtonWidget>("DIFFICULTY_DROPDOWNBUTTON").Text;
 
             //var missionDifficulty = widget.Get<LabelWidget>("MISSION_DIFFICULTY");
+
+            //var lines = System.IO.File.ReadAllLines("difficulty.txt").Where(arg => !string.IsNullOrWhiteSpace(arg));
+            //System.IO.File.WriteAllLines("difficulty.txt", lines);
+
+            difficulty = System.IO.File.ReadAllText("difficulty.txt");
+
             widget.Get<LabelWidget>("MISSION_DIFFICULTY").Text = difficulty;
 
             //String s_diff = Map.Difficulty();

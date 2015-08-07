@@ -208,8 +208,12 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
             File.Delete("difficulty.txt");
             System.IO.StreamWriter file = new System.IO.StreamWriter("difficulty.txt");
-            Console.WriteLine(difficulty);
             file.WriteLine(difficulty);
+            file.Close();
+            Console.WriteLine(difficulty);
+
+            var lines = System.IO.File.ReadAllLines("difficulty.txt").Where(arg => !string.IsNullOrWhiteSpace(arg));
+            System.IO.File.WriteAllLines("difficulty.txt", lines);
 
             difficultyButton = widget.Get<DropDownButtonWidget>("DIFFICULTY_DROPDOWNBUTTON");
             
@@ -233,17 +237,18 @@ namespace OpenRA.Mods.Common.Widgets.Logic
                 difficultyButton = widget.Get<DropDownButtonWidget>("DIFFICULTY_DROPDOWNBUTTON");
                 difficultyButton.ShowDropDown("LABEL_DROPDOWN_TEMPLATE", options.Count() * 30, options, setupItem);
 
-                try 
+                // Doesn't write to file in OnClick
+                /*try 
                 {
                     Console.WriteLine("{0}1", difficulty);
                     file.WriteLine(difficulty);
-                    file.Close();
                 }
                 catch (Exception e)
                 {
 
-                }
+                }*/
 			};
+            //file.Close();
 		}
 
 		float cachedSoundVolume;
