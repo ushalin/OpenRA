@@ -8,6 +8,8 @@
  */
 #endregion
 
+#define DEBUG
+
 using System;
 using System.Drawing;
 using System.Linq;
@@ -53,7 +55,31 @@ namespace OpenRA.Mods.Common.Widgets.Logic
             //var lines = System.IO.File.ReadAllLines("difficulty.txt").Where(arg => !string.IsNullOrWhiteSpace(arg));
             //System.IO.File.WriteAllLines("difficulty.txt", lines);
 
-            difficulty = System.IO.File.ReadAllText("difficulty.txt");
+            //difficulty = System.IO.File.ReadAllText("difficulty.txt");
+
+
+            // NEW SOLUTION
+            System.IO.StreamReader input = new System.IO.StreamReader("difficulty.txt");
+            String line = null;
+
+            do
+            {
+                line = input.ReadLine();
+                
+#if DEBUG
+            Console.WriteLine(line);
+#endif
+
+                if (line == null)
+                {
+                    break;
+                }
+                if (line == String.Empty)
+                {
+                    break;
+                }
+                difficulty = line;
+            } while (true);
 
             widget.Get<LabelWidget>("MISSION_DIFFICULTY").Text = difficulty;
 

@@ -8,6 +8,8 @@
  */
 #endregion
 
+//#define DEBUG
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -207,13 +209,20 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 
             File.Delete("difficulty.txt");
+
             System.IO.StreamWriter file = new System.IO.StreamWriter("difficulty.txt");
             file.WriteLine(difficulty);
             file.Close();
-            Console.WriteLine(difficulty);
 
-            var lines = System.IO.File.ReadAllLines("difficulty.txt").Where(arg => !string.IsNullOrWhiteSpace(arg));
-            System.IO.File.WriteAllLines("difficulty.txt", lines);
+#if DEBUG
+            Console.WriteLine(difficulty);
+#endif
+
+            //Attempts to remove white line from end of difficulty.txt (Attempt 1)
+            //var lines = System.IO.File.ReadAllLines("difficulty.txt").Where(arg => !string.IsNullOrWhiteSpace(arg));
+            //System.IO.File.WriteAllLines("difficulty.txt", lines);
+            //(Attempt 2)
+            //string[] text = File.ReadAllLines("difficulty.txt").Where(s => s.Trim() != string.Empty).ToArray();
 
             difficultyButton = widget.Get<DropDownButtonWidget>("DIFFICULTY_DROPDOWNBUTTON");
             
@@ -238,16 +247,24 @@ namespace OpenRA.Mods.Common.Widgets.Logic
                 difficultyButton.ShowDropDown("LABEL_DROPDOWN_TEMPLATE", options.Count() * 30, options, setupItem);
 
                 // Doesn't write to file in OnClick
-                /*try 
+                try 
                 {
-                    Console.WriteLine("{0}1", difficulty);
-                    file.WriteLine(difficulty);
+                    File.Delete("difficulty.txt");
+                    System.IO.StreamWriter file2 = new System.IO.StreamWriter("difficulty.txt");
+                    file2.WriteLine(difficulty);
+                    file2.Close();
+#if DEBUG
+            Console.WriteLine(difficulty);
+#endif
                 }
                 catch (Exception e)
                 {
 
-                }*/
+                }
 			};
+#if DEBUG
+            Console.WriteLine(difficulty);
+#endif
             //file.Close();
 		}
 
