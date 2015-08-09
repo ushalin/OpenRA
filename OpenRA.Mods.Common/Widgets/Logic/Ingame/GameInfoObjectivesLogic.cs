@@ -24,10 +24,6 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 	{
 		readonly ContainerWidget template;
 
-        // DELETE THIS LATER POSSIBLY
-		// DropDownButtonWidget difficulty;
-        //Widget temp_wid;
-
         String difficulty;
 
 		[ObjectCreator.UseCtor]
@@ -41,34 +37,12 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			missionStatus.GetColor = () => lp.WinState == WinState.Undefined ? Color.White :
 				lp.WinState == WinState.Won ? Color.LimeGreen : Color.Red;
 
-            /*var temp = world.Map.Options.Difficulties.Select(d => new LabelWidget
-            {
-                GetText = () => difficulty = d
-            });*/
-
-            //difficulty = world.Map.Options.Difficulties.FirstOrDefault();
-
-            //difficulty = widget.Get<DropDownButtonWidget>("DIFFICULTY_DROPDOWNBUTTON").Text;
-
-            //var missionDifficulty = widget.Get<LabelWidget>("MISSION_DIFFICULTY");
-
-            //var lines = System.IO.File.ReadAllLines("difficulty.txt").Where(arg => !string.IsNullOrWhiteSpace(arg));
-            //System.IO.File.WriteAllLines("difficulty.txt", lines);
-
-            //difficulty = System.IO.File.ReadAllText("difficulty.txt");
-
-
-            // NEW SOLUTION
             System.IO.StreamReader input = new System.IO.StreamReader("difficulty.txt");
             String line = null;
 
             do
             {
                 line = input.ReadLine();
-                
-#if DEBUG
-            Console.WriteLine(line);
-#endif
 
                 if (line == null)
                 {
@@ -82,8 +56,6 @@ namespace OpenRA.Mods.Common.Widgets.Logic
             } while (true);
 
             widget.Get<LabelWidget>("MISSION_DIFFICULTY").Text = difficulty;
-
-            //String s_diff = Map.Difficulty();
 
 			var mo = lp.PlayerActor.TraitOrDefault<MissionObjectives>();
 			if (mo == null)
