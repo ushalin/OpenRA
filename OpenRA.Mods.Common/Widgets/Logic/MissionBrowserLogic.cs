@@ -220,7 +220,8 @@ namespace OpenRA.Mods.Common.Widgets.Logic
                     item.Get<LabelWidget>("LABEL").GetText = () => option.Title;
                     return item;
                 };
-                
+
+                widget.Get<DropDownButtonWidget>("DIFFICULTY_DROPDOWNBUTTON").Text = "Difficulty - " + difficulty;
                 difficultyButton = widget.Get<DropDownButtonWidget>("DIFFICULTY_DROPDOWNBUTTON");
                 difficultyButton.ShowDropDown("LABEL_DROPDOWN_TEMPLATE", options.Count() * 30, options, setupItem);
 
